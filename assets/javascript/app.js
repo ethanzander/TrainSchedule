@@ -21,7 +21,7 @@ var frequency = 00;
 	var trainName = $("#train-name-input").val();
 	var trainDestination = $("#destination-input").val().trim();
 	var trainTime = moment($("#train-time-input").val().trim(), "HH:mm").format();
-    var trainFrequency = parsInt($("#frequency-input").val().trim());
+    var trainFrequency = parseInt($("#frequency-input").val().trim());
     
  	var newTrain = {
  		name: trainName,
@@ -33,11 +33,10 @@ var frequency = 00;
  	}
  	database.ref().push(newTrain);
 //Clear All Inputs
- 	$("#train-name").val("");
+ 	$("#train-name-input").val("");
  	$("#destination-input").val("");
- 	$("#train-time").val("");
+ 	$("#train-time-input").val("");
     $("#frequency-input").val("");
-    return false;
  });
 database.ref().on("child_added", function(snapshot) {
 	var trName = snapshot.val().name;
@@ -50,19 +49,23 @@ database.ref().on("child_added", function(snapshot) {
 	// var nextArrival = snapshot.val().nextArrival;
 
 	//train info
-	console.log("First Train: " + trTime);
+    console.log("First Train: " + trTime);
+    var convertTrainTime = moment(trTime, "HH:mm").subtract(1,"years");
+    console.log(convertTrainTime);
 	// Current Time
 	var currentTime = moment();
-	console.log("The time is: " + moment().format("HH:mm A"));
+    console.log("Current time =" + moment().format("HH:mm"));
+    var timeDiff = moment().diff(moment(convertTrainTime),"minutes");
+    var trainInterval = timeDiff %trFrequency;
 	//minutes away
-	var minutesAway = moment().diff(trTime, "HH:mm A") % trFrequency;
-	console.log("minutesAway " + minutesAway);
+	var minutesAway = trFrequency - trainInterval;
+	console.log("Minutes until next train " + minutesAway);
 	// next arrival time
-	var nextArrival = moment().add(minutesAway, "minutes").format("HH:mm A");
-	console.log("Next train " + nextArrival);
+    var nextArrival = moment().add(minutesAway, "minutes").format("HH:mm");
+	console.log("Next train arrival time " + nextArrival);
 
 	//fill in the table
-	$("#trainData").append('<tr><td>' + trName + '</td><td>' + trDestination + '</td><td>' + trFrequency + '</td><td>' + nextArrival + '</td><td>' + minutesAway + '</td></tr>');
+	$("#train-data").append('<tr><td>' + trName + '</td><td>' + trDestination + '</td><td>' + trFrequency + '</td><td>' + nextArrival + '</td><td>' + minutesAway + '</td></tr>');
 
 });
 
